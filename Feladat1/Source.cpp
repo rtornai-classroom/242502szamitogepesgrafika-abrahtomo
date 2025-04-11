@@ -12,14 +12,10 @@ GLint		windowHeight = 600;
 GLchar		windowTitle[] = "Elso feladat!";
 GLFWwindow* window = nullptr;
 
-void creatCircle() {
-	double time = glfwGetTime();
+float circleRadius = 50.0f;
+float speed = 100.0f;
 
-	float range = windowWidth - 2 * 100.0f;
-	float distance = fmod(time * 50.0f, 2 * range);
-	float x = windowWidth / 2.0f + (distance <= range ? distance : (2 * range - distance));
-	float y = windowHeight / 2.0f;
-
+void creatCircle(float x, float y) {
 	glBegin(GL_TRIANGLE_FAN);
 	//piros középpont
 	glColor3f(GLclampf(128.0 / 255.0), GLclampf(0.0 / 255.0), GLclampf(0.0 / 255.0));
@@ -29,13 +25,13 @@ void creatCircle() {
 	for (angle = 0.0f; angle < (2.0f * GL_PI); angle += (GL_PI / 64.0f)) {
 		//átmenet zöld árnyalatba
 		glColor3f(GLclampf(173.0 / 255.0), GLclampf(255.0 / 255.0), GLclampf(47.0 / 255.0));
-		float cx = 100 * cosf(angle);
-		float cy = 100 * sinf(angle);
+		float cx = circleRadius * cosf(angle);
+		float cy = circleRadius * sinf(angle);
 		glVertex2f(x + cx, y + cy);
 	}
 
-	float cx = 100.0f * cosf(0.0f);
-	float cy = 100.0f * sinf(0.0f);
+	float cx = 50.0f * cosf(0.0f);
+	float cy = 50.0f * sinf(0.0f);
 	glVertex2f(x + cx, y + cy);
 
 	glEnd();
@@ -69,7 +65,12 @@ void display() {
 	glOrtho(0, windowWidth, 0, windowHeight, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	creatCircle();
+	double time = glfwGetTime();
+	float range = windowWidth - 2 * circleRadius;
+	float distance = fmod(time * speed, 2 * range);
+	float x = circleRadius + (distance <= range ? distance : (2 * range - distance));
+	float y = windowHeight / 2.0f;
+	creatCircle(x, y);
 	createLine();
 }
 
