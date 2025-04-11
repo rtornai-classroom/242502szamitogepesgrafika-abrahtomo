@@ -12,35 +12,65 @@ GLint		windowHeight = 600;
 GLchar		windowTitle[] = "Elso feladat!";
 GLFWwindow* window = nullptr;
 
-void drawCircle() {
+void creatCircle() {
+	double time = glfwGetTime();
+
+	float range = windowWidth - 2 * 100.0f;
+	float distance = fmod(time * 50.0f, 2 * range);
+	float x = windowWidth / 2.0f + (distance <= range ? distance : (2 * range - distance));
+	float y = windowHeight / 2.0f;
+
 	glBegin(GL_TRIANGLE_FAN);
-	glColor3f(0.0f, 0.0f, 75.0f);
+	//piros középpont
+	glColor3f(GLclampf(128.0 / 255.0), GLclampf(0.0 / 255.0), GLclampf(0.0 / 255.0));
 	// Specify the next vertex for the triangle fan
-	glVertex2f(windowWidth / 2.0f, windowHeight / 2.0f);
+	glVertex2f(x, y);
 	float angle;
 	for (angle = 0.0f; angle < (2.0f * GL_PI); angle += (GL_PI / 64.0f)) {
-		float x = 100 * cosf(angle);
-		float y = 100 * sinf(angle);
-		glVertex2f(windowWidth / 2.0f + x, windowHeight / 2.0f + y);
+		//átmenet zöld árnyalatba
+		glColor3f(GLclampf(173.0 / 255.0), GLclampf(255.0 / 255.0), GLclampf(47.0 / 255.0));
+		float cx = 100 * cosf(angle);
+		float cy = 100 * sinf(angle);
+		glVertex2f(x + cx, y + cy);
 	}
 
-	float x = 100.0f * cosf(0.0f);
-	float y = 100.0f * sinf(0.0f);
-	glVertex2f(windowWidth / 2.0f + x, windowHeight / 2.0f + y);
+	float cx = 100.0f * cosf(0.0f);
+	float cy = 100.0f * sinf(0.0f);
+	glVertex2f(x + cx, y + cy);
+
+	glEnd();
+}
+
+void createLine() {
+	//3 pixel vastag
+	glLineWidth(3.0f);
+	//kék szín
+	glColor3f(GLclampf(65.0 / 255.0), GLclampf(105.0 / 255.0), GLclampf(225.0 / 255.0));
+
+	//ablak közepének meghatározása
+	float center = windowWidth / 2.0f;
+	//a vonat hosszának felének a meghatározása
+	float halfLineLength = windowWidth / 6.0f;
+
+	glBegin(GL_LINES);
+	//y értéke fix, x értéke változik a középpontól negatív és pozitív irányba féltávolsággal
+	glVertex2f(center - halfLineLength, center);
+	glVertex2f(center + halfLineLength, center);
 
 	glEnd();
 }
 
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT);
-
+	glViewport(0, 0, windowWidth, windowHeight);
 	// Reset projection matrix stack
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, windowWidth, 0, windowHeight, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	drawCircle();
+	creatCircle();
+	createLine();
 }
 
 void cleanUpScene(int returnCode) {
