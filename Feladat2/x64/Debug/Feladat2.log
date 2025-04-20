@@ -1,0 +1,4 @@
+﻿  Source.cpp
+C:\Users\Tamas\source\repos\Feladat2\Feladat2\Source.cpp(129,56): warning C4267: 'argument': conversion from 'size_t' to 'GLint', possible loss of data
+C:\Users\Tamas\source\repos\Feladat2\Feladat2\Source.cpp(136,55): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  Feladat2.vcxproj -> C:\Users\Tamas\source\repos\Feladat2\x64\Debug\Feladat2.exe
