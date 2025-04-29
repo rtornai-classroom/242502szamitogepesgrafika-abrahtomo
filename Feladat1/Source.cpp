@@ -16,7 +16,6 @@ GLFWwindow* window = nullptr;
 float circleRadius = 50.0f;
 float speed = 100.0f;
 float velocityX = 150.0f;
-float velocityY = 120.0f;
 float lastTime = 0.0f;
 
 GLuint shaderProgram;
