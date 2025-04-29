@@ -15,14 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="CurveTessEvalShader.glsl" />
-    <None Include="CurveFragShader.glsl" />
-    <None Include="CurveTessContShader.glsl" />
-    <None Include="CurveVertShader.glsl" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="vertexShader.glsl" />
+    <None Include="fragmentShader.glsl" />
   </ItemGroup>
 </Project>

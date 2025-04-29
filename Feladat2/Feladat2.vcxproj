@@ -138,10 +138,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="CurveFragShader.glsl" />
-    <None Include="CurveTessContShader.glsl" />
-    <None Include="CurveTessEvalShader.glsl" />
-    <None Include="CurveVertShader.glsl" />
+    <None Include="fragmentShader.glsl" />
+    <None Include="vertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
