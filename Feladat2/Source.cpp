@@ -3,12 +3,10 @@
 #include <cstdlib>
 #include "glm/glm.hpp"
 #include <Windows.h>
-#include <array>
 #include <vector>
 #include <iostream>
-#include <string>
 #include <fstream>
-#include <math.h>
+#include <sstream>
 
 using namespace std;
 
@@ -41,79 +39,63 @@ void updateVBO() {
 }
 
 string readShaderSource(const char* filePath) {
-    string content;
-    ifstream fileStream(filePath, ios::in);
-    string line = "";
-    while (!fileStream.eof()) {
-        getline(fileStream, line);
-        content.append(line + "\n");
+    ifstream file(filePath);
+    if (!file.is_open()) {
+        cerr << "Error opening shader file: " << filePath << endl;
+        return "";
     }
-    fileStream.close();
-    return content;
-}
 
-void checkOpenGLError() {
-    int glErr = glGetError();
-    while (glErr != GL_NO_ERROR) {
-        cout << "Error found: " << glErr << endl;
-        glErr = glGetError();
-    }
-}
-
-void checkShaderError(GLuint shader) {
-    char infoLog[512];
-    glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-    cerr << "Shader Compilation Failed: " << infoLog << endl;
+    stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
 }
 
 GLuint createShaderProgram() {
-    GLint vertCompiled;
-    GLint fragCompiled;
-    GLint linked;
+    string vertexCode = readShaderSource("vertexShader.glsl");
+    string fragmentCode = readShaderSource("fragmentShader.glsl");
 
-    string vertShaderStr = readShaderSource("vertexShader.glsl");
-    string fragShaderStr = readShaderSource("fragmentShader.glsl");
+    const char* vShaderCode = vertexCode.c_str();
+    const char* fShaderCode = fragmentCode.c_str();
 
-    GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vShaderCode, NULL);
+    glCompileShader(vertexShader);
 
-    const char* vertShaderSrc = vertShaderStr.c_str();
-    const char* fragShaderSrc = fragShaderStr.c_str();
-
-    glShaderSource(vShader, 1, &vertShaderSrc, NULL);
-    glShaderSource(fShader, 1, &fragShaderSrc, NULL);
-
-    glCompileShader(vShader);
-    checkOpenGLError();
-    glGetShaderiv(vShader, GL_COMPILE_STATUS, &vertCompiled);
-    if (vertCompiled != 1) {
-        checkShaderError(vShader);
-    }
-
-    glCompileShader(fShader);
-    checkOpenGLError();
-    glGetShaderiv(fShader, GL_COMPILE_STATUS, &fragCompiled);
-    if (fragCompiled != 1) {
-        checkShaderError(fShader);
-    }
-
-    GLuint vfProgram = glCreateProgram();
-    glAttachShader(vfProgram, vShader);
-    glAttachShader(vfProgram, fShader);
-
-    glLinkProgram(vfProgram);
-    checkOpenGLError();
-    glGetProgramiv(vfProgram, GL_LINK_STATUS, &linked);
-    if (linked != 1) {
+    GLint success;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
         char infoLog[512];
-        glGetProgramInfoLog(vfProgram, 512, nullptr, infoLog);
-        cerr << "Program Linking Failed: " << infoLog << endl;
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        cerr << "Vertex shader compilation failed:\n" << infoLog << endl;
     }
 
-    glDeleteShader(vShader);
-    glDeleteShader(fShader);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fShaderCode, NULL);
+    glCompileShader(fragmentShader);
 
-    return vfProgram;
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char infoLog[512];
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        cerr << "Fragment shader compilation failed:\n" << infoLog << endl;
+    }
+
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        char infoLog[512];
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        cerr << "Shader program linking failed:\n" << infoLog << endl;
+    }
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgram;
 }
 
 int fact(int n) {
@@ -254,10 +236,14 @@ void init(GLFWwindow* window) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void cleanUpScene(int returnCode) {
+void cleanUpScene() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteProgram(shaderProgram);
+}
+
+void cleanUpScene(int returnCode) {
+    cleanUpScene();
     glfwTerminate();
     exit(returnCode);
 }
@@ -312,10 +298,6 @@ int main(void) {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
     glfwDestroyWindow(window);
-    glfwTerminate();
-    exit(EXIT_SUCCESS);
+    cleanUpScene(EXIT_SUCCESS);
 }
